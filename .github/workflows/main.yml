@@ -26,7 +26,6 @@ jobs:
               echo "Python is installed!"
               python3 --version
               
-
               TARGET_DIR="/var/www/web"
               
               mkdir -p $TARGET_DIR
@@ -40,8 +39,31 @@ jobs:
                 git clone https://github.com/AlexTM505/ssh_baglanmak_amaly.git .
               fi
               
-              echo "Deploy üstünlikli tamamlandy!"
+              # Wirtual gurşawy (env) barlamak we döretmek
+              if [ ! -d "env" ]; then
+                python3 -m venv env
+              fi
+              
+              # Wirtual gurşawy işjeňleşdirmek we kitaphanalary gurnamak
+              source env/bin/activate
+              pip install --upgrade pip
+              if [ -f "requirements.txt" ]; then
+                pip install -r requirements.txt
+              fi
+              
+              # Maglumatlar bazasyny migrasiýa etmek
+              python3 manage.py migrate
+              
+              # Öň işleýän python/manage.py proseslerini ýatyrmak (port boşar ýaly)
+              pkill -f manage.py || true
+              
+              # 5787 portunda Django proýektini fon režiminde işledip goýbermek
+              CUSTOM_PORT=5787
+              echo "Django proýekti $CUSTOM_PORT portunda işledilýär..."
+              nohup python3 manage.py runserver 0.0.0.0:$CUSTOM_PORT > django.log 2>&1 &
+              
+              echo "Deploy we Run üstünlikli tamamlandy!"
             else
-              echo "Python is NOT installed! Python gurnalmandygy üçin proýekt çekilmedi."
+              echo "Python is NOT installed! Python gurnalmandygy üçin proýekt işledilmedi."
             fi
             '

@@ -1,11 +1,11 @@
-name: Serwere Birikmek we Python Barlamak
+name: Serwere Barlamak we Proýekti Çekmek
 
 on:
   push:
     branches: [ master ]
 
 jobs:
-  check_python:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Install sshpass
@@ -13,7 +13,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sshpass
 
-      - name: Check Python on Remote Server
+      - name: Check Python and Deploy Project
         env:
           SSHPASS: ${{ secrets.SERVER_PASSWORD }}
         run: |
@@ -25,7 +25,23 @@ jobs:
             if command -v python3 >/dev/null 2>&1; then
               echo "Python is installed!"
               python3 --version
+              
+
+              TARGET_DIR="/var/www/web"
+              
+              mkdir -p $TARGET_DIR
+              cd $TARGET_DIR
+              
+              if [ -d ".git" ]; then
+                echo "Git repository bar, täze kodlar çekilýär (git pull)..."
+                git pull origin master
+              else
+                echo "Git repository tapylmady, proýekt klonirlenýär..."
+                git clone https://github.com/AlexTM505/ssh_baglanmak_amaly.git .
+              fi
+              
+              echo "Deploy üstünlikli tamamlandy!"
             else
-              echo "Python is NOT installed!"
+              echo "Python is NOT installed! Python gurnalmandygy üçin proýekt çekilmedi."
             fi
             '
